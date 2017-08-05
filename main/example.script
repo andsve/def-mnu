@@ -1,0 +1,40 @@
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	mnu.begin()
+	
+	mnu.sub_begin("App Menu")
+	mnu.label(1, true, "About")
+	mnu.sub_finish()
+	
+	mnu.sub_begin("File")
+	mnu.label(2, true, "New")
+	mnu.sub_finish()
+	
+	mnu.sub_begin("Edit")
+	mnu.label(3, true, "Copy")
+	mnu.label(4, true, "Paste")
+	mnu.sub_finish()
+
+	mnu.finish()
+	mnu.show_app_menu(function(id)
+		print("app menu: " .. tostring(id))
+	end)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("touch") and action.released then
+		
+		mnu.begin()
+		mnu.label(1, true, "Apa")
+		mnu.sub_begin("File")
+		mnu.label(2, true, "New")
+		mnu.sub_finish()
+		mnu.separator()
+		mnu.label(3, false, "No no no...")
+		mnu.separator()
+		mnu.label(4, true, "Yes yes yes...")
+		mnu.finish()
+		
+		print(mnu.show(action.screen_x, sys.get_config("display.height") - action.screen_y))
+	end
+end
