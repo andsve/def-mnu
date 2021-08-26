@@ -1,0 +1,67 @@
+- name: mnu
+  type: table
+  desc: Functions and constants for interacting with mnu APIs
+
+  members:
+
+#*****************************************************************************************************
+
+  - name: begin
+    type: function
+
+#*****************************************************************************************************
+
+  - name: sub_finish
+    type: function
+
+#*****************************************************************************************************
+
+  - name: separator
+    type: function
+
+#*****************************************************************************************************
+
+  - name: finish
+    type: function
+
+#*****************************************************************************************************
+
+  - name: label
+    type: function
+
+    parameters:
+      - name: id
+        type: number
+      - name: enabled
+        type: boolean
+      - name: label
+        type: string
+
+#*****************************************************************************************************
+
+  - name: sub_begin
+    type: function
+
+    parameters:
+      - name: label
+        type: string
+
+#*****************************************************************************************************
+
+  - name: show
+    type: function
+
+    parameters:
+      - name: x
+        type: number
+      - name: y
+        type: number
+
+#*****************************************************************************************************
+
+  - name: show_app_menu
+    type: function
+
+    parameters:
+      - name: callback
+        type: function
