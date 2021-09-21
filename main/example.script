@@ -3,7 +3,7 @@ function init(self)
 	mnu.begin()
 	
 	mnu.sub_begin("App Menu")
-	mnu.label(1, true, "About")
+	mnu.label(1, true, "About", "a")
 	mnu.sub_finish()
 	
 	mnu.sub_begin("File")
@@ -11,8 +11,8 @@ function init(self)
 	mnu.sub_finish()
 	
 	mnu.sub_begin("Edit")
-	mnu.label(3, true, "Copy")
-	mnu.label(4, true, "Paste")
+	mnu.label(3, true, "Copy", "c")
+	mnu.label(4, true, "Paste", "v")
 	mnu.sub_finish()
 
 	mnu.finish()

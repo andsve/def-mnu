@@ -37,7 +37,14 @@ static int Mnu_Label(lua_State* L)
     CHECK_CURRENT_MENU();
 
     luaL_checktype(L, 2, LUA_TBOOLEAN);
-    seam_item_label(g_CurrentMenu, luaL_checkinteger(L, 1), lua_toboolean(L, 2), (char*)luaL_checkstring(L, 3));
+    if (lua_type(L, 4) != LUA_TNONE)
+    {
+        seam_item_label(g_CurrentMenu, luaL_checkinteger(L, 1), lua_toboolean(L, 2), (char*)luaL_checkstring(L, 3), (char*)luaL_checkstring(L, 4));
+    }
+    else
+    {
+        seam_item_label(g_CurrentMenu, luaL_checkinteger(L, 1), lua_toboolean(L, 2), (char*)luaL_checkstring(L, 3), 0x0);
+    }
     return 0;
 }
 

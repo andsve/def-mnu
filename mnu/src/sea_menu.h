@@ -62,12 +62,14 @@ struct seam__menu_item
   seam__menu_item() {
     type = SEAM_LABEL;
     label = 0x0;
+    key = 0x0;
     id = 0;
     enabled = 0;
     next = 0x0;
   }
   SEAM_ITEMS type;
   char* label;
+  char* key;
   int id;
   int enabled;
   struct seam__menu_item* next;
@@ -81,7 +83,7 @@ typedef struct
 
 
 SEAMDEF seam_menu_data* seam_begin();
-SEAMDEF void seam_item_label( seam_menu_data*, int, int, char* );
+SEAMDEF void seam_item_label( seam_menu_data*, int, int, char*, char*);
 SEAMDEF void seam_item_separator( seam_menu_data* );
 SEAMDEF void seam_item_sub_start( seam_menu_data*, char* );
 SEAMDEF void seam_item_sub_end( seam_menu_data* );
@@ -128,17 +130,27 @@ static void seam__insert_item( seam_menu_data* menu, seam__menu_item* item )
   }
 }
 
-SEAMDEF void seam_item_label( seam_menu_data* menu, int id, int enabled, char* label )
+SEAMDEF void seam_item_label( seam_menu_data* menu, int id, int enabled, char* label, char* key)
 {
   seam__menu_item zitem;// = {0};
   seam__menu_item* item = (seam__menu_item*)malloc( sizeof(seam__menu_item) );
   *item = zitem;
   item->type = SEAM_LABEL;
   item->enabled = enabled;
+  
   size_t label_len = strlen( label );
   item->label = (char*)malloc( sizeof(char) * label_len + 1 );
   strncpy( item->label, label, label_len );
   item->label[label_len] = 0;
+
+  if (key != 0x0)
+  {
+    size_t key_len = strlen( key );
+    item->key = (char*)malloc( sizeof(char) * key_len + 1 );
+    strncpy( item->key, key, key_len );
+    item->key[key_len] = 0;
+  }
+  
   item->id = id;
   item->next = NULL;
 
@@ -283,7 +295,9 @@ static id _seam_create_menu( seam_menu_data* menu, int x, int y )
           flags |= MF_GRAYED;
         AppendMenu(walk_stack.top->native_pointer, flags, item->id, item->label);
 #elif defined(SEA_PLATFORM_OSX)
-        id menu_item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:item->label] action:NULL keyEquivalent:@""] autorelease];
+        id menu_item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:item->label] 
+                          action:NULL 
+                          keyEquivalent:[NSString stringWithUTF8String:(item->key == 0x0 ? "" : item->key)]] autorelease];
         [menu_item setTag:item->id];
         [walk_stack.top->native_pointer addItem:menu_item];
 
@@ -472,6 +486,10 @@ SEAMDEF void seam_release( seam_menu_data* menu )
       case SEAM_GROUP_BEGIN:
       case SEAM_LABEL: {
         free( item->label );
+        if (item->key != 0x0)
+        {
+          free( item->key );
+        }
       } break;
     }
 
