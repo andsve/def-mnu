@@ -110,11 +110,41 @@ SEAMDEF void seam_release( seam_menu_data* );
 #import <AppKit/AppKit.h>
 #endif
 
+#if defined(SEA_PLATFORM_OSX)
+
+static seam_menu_cb seam__appmenu_callback;
+
+@interface SEAMenuDelegate :  NSObject
+- (void) btnAction: (id)sender;
+@end
+
+@implementation SEAMenuDelegate
+
+- (void)btnAction:(id)sender
+{
+  if (seam__appmenu_callback) {
+    seam__appmenu_callback([sender tag]);
+  }
+
+}
+
+@end
+
+static SEAMenuDelegate* seam__appmenu_delegate = 0x0;
+
+#endif
+
 SEAMDEF seam_menu_data* seam_begin()
 {
   seam_menu_data* menu = (seam_menu_data*)malloc( sizeof(seam_menu_data) );
   menu->first = NULL;
   menu->last = NULL;
+  #if defined(SEA_PLATFORM_OSX)
+  if (seam__appmenu_delegate == 0x0)
+  {
+    seam__appmenu_delegate = [[SEAMenuDelegate alloc] init];
+  }
+#endif
   return menu;
 }
 
@@ -214,45 +244,6 @@ typedef struct
 } seam__walk_stack;
 
 
-#if defined(SEA_PLATFORM_OSX)
-
-static seam_menu_cb seam__appmenu_callback;
-
-@interface SEAMenuDelegate :  NSObject <NSMenuDelegate>
-
-@end
-
-@implementation SEAMenuDelegate
-
-  - (void)menuDidClose:(NSMenu *)menu
-  {
-
-    NSMenu* selected_menu = menu;
-    NSMenuItem* selected_item = [selected_menu highlightedItem];
-    while (true)
-    {
-      if ([selected_item hasSubmenu])
-      {
-        selected_menu = [selected_item submenu];
-        selected_item = [selected_menu highlightedItem];
-      } else {
-        if (seam__appmenu_callback) {
-          seam__appmenu_callback([selected_item tag]);
-        }
-        break;
-      }
-    }
-
-  }
-
-@end
-
-static SEAMenuDelegate* seam__appmenu_delegate;
-
-
-#endif
-
-
 #if defined(SEA_PLATFORM_WIN)
 static HMENU _seam_create_menu( seam_menu_data* menu, int x, int y )
 #elif defined(SEA_PLATFORM_OSX)
@@ -296,9 +287,10 @@ static id _seam_create_menu( seam_menu_data* menu, int x, int y )
         AppendMenu(walk_stack.top->native_pointer, flags, item->id, item->label);
 #elif defined(SEA_PLATFORM_OSX)
         id menu_item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:item->label] 
-                          action:NULL 
+                          action:@selector(btnAction:)
                           keyEquivalent:[NSString stringWithUTF8String:(item->key == 0x0 ? "" : item->key)]] autorelease];
         [menu_item setTag:item->id];
+        [menu_item setTarget:seam__appmenu_delegate];
         [walk_stack.top->native_pointer addItem:menu_item];
 
         [menu_item setEnabled:item->enabled];
@@ -454,19 +446,8 @@ SEAMDEF void seam_app_menu( seam_menu_data* menu, seam_menu_cb callback )
 
 #elif defined(SEA_PLATFORM_OSX)
 
-  seam__appmenu_delegate = [[SEAMenuDelegate alloc] init];
   seam__appmenu_callback = callback;
-
   id appMenu = [native_menu copy];
-  [appMenu setDelegate: seam__appmenu_delegate];
-
-  for (id sub in [appMenu itemArray])
-  {
-    if ([sub hasSubmenu]) {
-      [[sub submenu] setDelegate: seam__appmenu_delegate];
-    }
-  }
-
   [NSApp setMainMenu:appMenu];
 
 #endif
