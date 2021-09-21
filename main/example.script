@@ -18,6 +18,8 @@ function init(self)
 	mnu.finish()
 	mnu.show_app_menu(function(id)
 		print("app menu: " .. tostring(id))
+		pprint(mgs.url())
+		msg.post("/info#info", "set_text", {text = id})
 	end)
 end
 

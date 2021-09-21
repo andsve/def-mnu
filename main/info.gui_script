@@ -1,0 +1,9 @@
+function init(self)
+	local box = gui.get_node("box")
+	gui.animate(box, gui.PROP_POSITION, vmath.vector3(400,400,0), gui.EASING_LINEAR, 1, 0, nil, gui.PLAYBACK_LOOP_PINGPONG)
+end
+function on_message(self, message_id, message, sender)
+	if message_id == hash("set") then
+		gui.set_text(gui.get_node("set_text"), message.text)
+	end
+end
