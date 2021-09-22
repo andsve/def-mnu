@@ -12,7 +12,7 @@ function init(self)
 	
 	mnu.sub_begin("Edit")
 	mnu.label(3, true, "Copy", "c")
-	mnu.label(4, true, "Paste", "м")
+	mnu.label(4, true, "Paste", "v")
 	mnu.sub_finish()
 
 	mnu.finish()
@@ -25,17 +25,17 @@ end
 function on_input(self, action_id, action)
 	if action_id == hash("touch") and action.released then
 		
-		-- mnu.begin()
-		-- mnu.label(1, true, "Apa")
-		-- mnu.sub_begin("File")
-		-- mnu.label(2, true, "New")
-		-- mnu.sub_finish()
-		-- mnu.separator()
-		-- mnu.label(3, false, "No no no...")
-		-- mnu.separator()
-		-- mnu.label(4, true, "Yes yes yes...")
-		-- mnu.finish()
-		-- 
-		-- print("mnu.show", mnu.show(action.screen_x, sys.get_config("display.height") - action.screen_y))
+		mnu.begin()
+		mnu.label(1, true, "Apa")
+		mnu.sub_begin("File")
+		mnu.label(2, true, "New")
+		mnu.sub_finish()
+		mnu.separator()
+		mnu.label(3, false, "No no no...")
+		mnu.separator()
+		mnu.label(4, true, "Yes yes yes...")
+		mnu.finish()
+		
+		print("mnu.show", mnu.show(action.screen_x, sys.get_config("display.height") - action.screen_y))
 	end
 end

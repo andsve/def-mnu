@@ -247,7 +247,7 @@ typedef struct
 #if defined(SEA_PLATFORM_WIN)
 static HMENU _seam_create_menu( seam_menu_data* menu, int x, int y )
 #elif defined(SEA_PLATFORM_OSX)
-static id _seam_create_menu( seam_menu_data* menu, int x, int y )
+static id _seam_create_menu( seam_menu_data* menu, int x, int y, bool need_callback )
 #endif
 {
   seam__walk_stack walk_stack;
@@ -287,10 +287,14 @@ static id _seam_create_menu( seam_menu_data* menu, int x, int y )
         AppendMenu(walk_stack.top->native_pointer, flags, item->id, item->label);
 #elif defined(SEA_PLATFORM_OSX)
         id menu_item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:item->label] 
-                          action:@selector(btnAction:)
+                          action:NULL
                           keyEquivalent:[NSString stringWithUTF8String:(item->key == 0x0 ? "" : item->key)]] autorelease];
         [menu_item setTag:item->id];
-        [menu_item setTarget:seam__appmenu_delegate];
+        if (need_callback)
+        {
+          [menu_item setAction:@selector(btnAction:)];
+          [menu_item setTarget:seam__appmenu_delegate];
+        }
         [walk_stack.top->native_pointer addItem:menu_item];
 
         [menu_item setEnabled:item->enabled];
@@ -378,7 +382,7 @@ SEAMDEF int seam_open_menu( seam_menu_data* menu, int x, int y )
 #if defined(SEA_PLATFORM_WIN)
   HMENU native_menu = _seam_create_menu( menu, x, y );
 #elif defined(SEA_PLATFORM_OSX)
-  id native_menu = _seam_create_menu( menu, x, y );
+  id native_menu = _seam_create_menu( menu, x, y, false );
 #endif
   int ret = -1;
 
@@ -433,7 +437,7 @@ SEAMDEF void seam_app_menu( seam_menu_data* menu, seam_menu_cb callback )
 #if defined(SEA_PLATFORM_WIN)
   HMENU native_menu = _seam_create_menu( menu, 0, 0 );
 #elif defined(SEA_PLATFORM_OSX)
-  id native_menu = _seam_create_menu( menu, 0, 0 );
+  id native_menu = _seam_create_menu( menu, 0, 0, true );
   // id native_menu2 = _seam_create_menu( menu, 0, 0 );
 #endif
   int ret = -1;
