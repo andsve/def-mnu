@@ -245,7 +245,7 @@ typedef struct
 
 
 #if defined(SEA_PLATFORM_WIN)
-static HMENU _seam_create_menu( seam_menu_data* menu, int x, int y )
+static HMENU _seam_create_menu( seam_menu_data* menu, int x, int y, bool is_window )
 #elif defined(SEA_PLATFORM_OSX)
 static id _seam_create_menu( seam_menu_data* menu, int x, int y, bool need_callback )
 #endif
@@ -256,7 +256,11 @@ static id _seam_create_menu( seam_menu_data* menu, int x, int y, bool need_callb
   // setup steps
 #if defined(SEA_PLATFORM_WIN)
 
-  HMENU native_menu = CreatePopupMenu();
+  HMENU native_menu;
+  if (is_window)
+    native_menu = CreateMenu();
+  else
+    native_menu = CreatePopupMenu();
 
 #elif defined(SEA_PLATFORM_OSX)
 
@@ -327,7 +331,11 @@ static id _seam_create_menu( seam_menu_data* menu, int x, int y, bool need_callb
 
 #if defined(SEA_PLATFORM_WIN)
         UINT flags = MF_POPUP;
-        HMENU subMenu = CreatePopupMenu();
+        HMENU subMenu; 
+        if (is_window)
+          subMenu = CreateMenu();
+        else
+          subMenu = CreatePopupMenu();
         subitem->native_pointer = subMenu;
 
         if (!item->enabled)
@@ -380,7 +388,7 @@ static id _seam_create_menu( seam_menu_data* menu, int x, int y, bool need_callb
 SEAMDEF int seam_open_menu( seam_menu_data* menu, int x, int y )
 {
 #if defined(SEA_PLATFORM_WIN)
-  HMENU native_menu = _seam_create_menu( menu, x, y );
+  HMENU native_menu = _seam_create_menu( menu, x, y, false );
 #elif defined(SEA_PLATFORM_OSX)
   id native_menu = _seam_create_menu( menu, x, y, false );
 #endif
@@ -435,18 +443,15 @@ SEAMDEF int seam_open_menu( seam_menu_data* menu, int x, int y )
 SEAMDEF void seam_app_menu( seam_menu_data* menu, seam_menu_cb callback )
 {
 #if defined(SEA_PLATFORM_WIN)
-  HMENU native_menu = _seam_create_menu( menu, 0, 0 );
+  HMENU native_menu = _seam_create_menu( menu, 0, 0, true );
 #elif defined(SEA_PLATFORM_OSX)
   id native_menu = _seam_create_menu( menu, 0, 0, true );
-  // id native_menu2 = _seam_create_menu( menu, 0, 0 );
 #endif
   int ret = -1;
 
 #if defined(SEA_PLATFORM_WIN)
-
-//#error "Not seam_app_menu implemented on Windows"
-  // ret = TrackPopupMenu(native_menu, TPM_RIGHTBUTTON | TPM_NONOTIFY | TPM_RETURNCMD | TPM_VERPOSANIMATION, point.x, point.y, 0, hWnd, NULL);
-  // DestroyMenu(native_menu);
+  HWND hWnd = GetActiveWindow();
+  SetMenu(hWnd, native_menu);
 
 #elif defined(SEA_PLATFORM_OSX)
 
