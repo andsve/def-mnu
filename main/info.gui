@@ -98,7 +98,7 @@ nodes {
   blend_mode: BLEND_MODE_ALPHA
   text: ""
   font: "system_font"
-  id: "text"
+  id: "set_text"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
   pivot: PIVOT_CENTER

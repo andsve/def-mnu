@@ -10,7 +10,7 @@
 #endif
 #include "sea_menu.h"
 
-static int g_AppMenuCB = LUA_NOREF;
+static dmScript::LuaCallbackInfo* g_AppMenuCB = 0x0;
 static int g_LastAppMenuResult = 0;
 static seam_menu_data* g_CurrentMenu = 0x0;
 static seam_menu_data* g_CurrentAppMenu = 0x0;
@@ -103,12 +103,12 @@ static int Mnu_ShowAppMenu(lua_State* L)
 
     luaL_checktype(L, 1, LUA_TFUNCTION);
 
-    if (g_AppMenuCB != LUA_NOREF)
+    if (g_AppMenuCB != 0x0)
     {
-        luaL_unref(L, LUA_REGISTRYINDEX, g_AppMenuCB);
+        dmScript::DestroyCallback(g_AppMenuCB);
+        g_AppMenuCB = 0x0;
     }
-    lua_pushvalue(L, 1);
-    g_AppMenuCB = luaL_ref(L, LUA_REGISTRYINDEX);
+    g_AppMenuCB = dmScript::CreateCallback(L, 1);
 
     seam_app_menu( g_CurrentAppMenu, _app_menu_cb );
     return 0;
@@ -153,16 +153,26 @@ static dmExtension::Result InitializeMnu(dmExtension::Params* params)
 
 static dmExtension::Result UpdateMnu(dmExtension::Params* params)
 {
-    lua_State* L = params->m_L;
-    int top = lua_gettop(L);
-    if (g_LastAppMenuResult != 0 && g_AppMenuCB != LUA_NOREF)
+    if (g_LastAppMenuResult != 0 && g_AppMenuCB != 0x0)
     {
-        lua_rawgeti(L, LUA_REGISTRYINDEX, g_AppMenuCB);
+        if (!dmScript::IsCallbackValid(g_AppMenuCB))
+        {
+            dmLogError("def-mnu callback is invalid.");
+            return dmExtension::RESULT_OK;
+        }
+        lua_State* L = dmScript::GetCallbackLuaContext(g_AppMenuCB);
+        DM_LUA_STACK_CHECK(L, 0);
+        if (!dmScript::SetupCallback(g_AppMenuCB))
+        {
+            dmLogError("Can't setup callback.");
+            return dmExtension::RESULT_OK;
+        }
         lua_pushinteger(L, g_LastAppMenuResult);
-        lua_call(L, 1, 0);
+        int ret = dmScript::PCall(L, 2, 0);
+        (void)ret;
+        dmScript::TeardownCallback(g_AppMenuCB);
+        g_LastAppMenuResult = 0;
     }
-    g_LastAppMenuResult = 0;
-    assert(top == lua_gettop(L));
     return dmExtension::RESULT_OK;
 }
 
@@ -173,6 +183,11 @@ static dmExtension::Result AppFinalizeMnu(dmExtension::AppParams* params)
 
 static dmExtension::Result FinalizeMnu(dmExtension::Params* params)
 {
+    if (g_AppMenuCB != 0x0)
+    {
+        dmScript::DestroyCallback(g_AppMenuCB);
+        g_AppMenuCB = 0x0;
+    }
     return dmExtension::RESULT_OK;
 }
 
