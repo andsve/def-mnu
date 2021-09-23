@@ -247,7 +247,7 @@ typedef struct
 #if defined(SEA_PLATFORM_WIN)
 static HMENU _seam_create_menu( seam_menu_data* menu, int x, int y, bool is_window )
 #elif defined(SEA_PLATFORM_OSX)
-static id _seam_create_menu( seam_menu_data* menu, int x, int y, bool need_callback )
+static id _seam_create_menu( seam_menu_data* menu, int x, int y, bool is_window )
 #endif
 {
   seam__walk_stack walk_stack;
@@ -294,7 +294,7 @@ static id _seam_create_menu( seam_menu_data* menu, int x, int y, bool need_callb
                           action:NULL
                           keyEquivalent:[NSString stringWithUTF8String:(item->key == 0x0 ? "" : item->key)]] autorelease];
         [menu_item setTag:item->id];
-        if (need_callback)
+        if (is_window)
         {
           [menu_item setAction:@selector(btnAction:)];
           [menu_item setTarget:seam__appmenu_delegate];
