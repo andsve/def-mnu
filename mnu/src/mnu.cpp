@@ -5,6 +5,8 @@
 // include the Defold SDK
 #include <dmsdk/sdk.h>
 
+#if defined(DM_PLATFORM_OSX) || defined(DM_PLATFORM_WINDOWS)
+
 #ifndef __APPLE__
 #define SEA_MENU_IMPLEMENTATION
 #endif
@@ -192,3 +194,19 @@ static dmExtension::Result FinalizeMnu(dmExtension::Params* params)
 }
 
 DM_DECLARE_EXTENSION(mnu, LIB_NAME, AppInitializeMnu, AppFinalizeMnu, InitializeMnu, UpdateMnu, 0, FinalizeMnu)
+
+#else // unsupported platforms
+static dmExtension::Result InitializeMnu(dmExtension::Params* params)
+{
+    dmLogInfo("Registered extension mnu (null)");
+    return dmExtension::RESULT_OK;
+}
+
+static dmExtension::Result FinalizeMnu(dmExtension::Params* params)
+{
+    return dmExtension::RESULT_OK;
+}
+
+DM_DECLARE_EXTENSION(mnu, LIB_NAME, 0, 0, InitializeMnu, 0, 0, FinalizeMnu)
+#endif 
+ 
